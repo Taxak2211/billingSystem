@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { type Product, type BillItem } from '../types';
 import { GST_RATE } from '../constants';
@@ -15,7 +14,20 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
   const [billItems, setBillItems] = useState<BillItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string>(products.length > 0 ? String(products[0].id) : '');
   const [quantity, setQuantity] = useState<number>(1);
+  const [rate, setRate] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+
+  // Keep selected product in sync when the products list changes
+  React.useEffect(() => {
+    if (!products || products.length === 0) {
+      setSelectedProductId('');
+      return;
+    }
+    const exists = products.some(p => String(p.id) === selectedProductId);
+    if (!exists) {
+      setSelectedProductId(String(products[0].id));
+    }
+  }, [products]);
 
   const subtotal = useMemo(() => {
     return billItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
@@ -31,27 +43,34 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
     }
     const product = products.find(p => p.id === parseInt(selectedProductId));
     if (product) {
-      const existingItemIndex = billItems.findIndex(item => item.product.id === product.id);
+      const parsedRate = parseFloat(rate as string);
+      const productWithRate = { ...product, price: Number.isFinite(parsedRate) && parsedRate > 0 ? parsedRate : product.price };
+
+      const existingItemIndex = billItems.findIndex(item => item.product.id === product.id && item.product.price === productWithRate.price);
       if (existingItemIndex !== -1) {
         const updatedItems = [...billItems];
         updatedItems[existingItemIndex].quantity += quantity;
         setBillItems(updatedItems);
       } else {
-        setBillItems([...billItems, { product, quantity }]);
+        const lineId = `${product.id}-${productWithRate.price}-${Date.now()}-${Math.floor(Math.random()*10000)}`;
+        setBillItems([...billItems, { product: productWithRate, quantity, lineId }]);
       }
       setQuantity(1);
+      setRate('');
       setError(null);
     }
   };
 
-  const handleRemoveItem = (productId: number) => {
-    setBillItems(billItems.filter(item => item.product.id !== productId));
+  const handleRemoveItem = (lineId?: string) => {
+    if (!lineId) return;
+    setBillItems(billItems.filter(item => item.lineId !== lineId));
   };
     
-  const handleQuantityChange = (productId: number, newQuantity: number) => {
+  const handleQuantityChange = (lineId: string | undefined, newQuantity: number) => {
+    if (!lineId) return;
     if (newQuantity > 0) {
       setBillItems(billItems.map(item =>
-        item.product.id === productId ? { ...item, quantity: newQuantity } : item
+        item.lineId === lineId ? { ...item, quantity: newQuantity } : item
       ));
     }
   };
@@ -107,7 +126,7 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-gray-700">Add Products</h2>
         <div className="flex flex-wrap items-end gap-4 p-4 bg-gray-50 rounded-lg">
-          <div className="flex-grow min-w-[200px]">
+            <div className="flex-grow min-w-[200px]">
             <label htmlFor="product" className="block text-sm font-medium text-gray-600 mb-1">Product</label>
             <select
               id="product"
@@ -126,6 +145,19 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
               min="1"
               value={quantity}
               onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition"
+            />
+          </div>
+          <div className="flex-grow" style={{maxWidth: '140px'}}>
+            <label htmlFor="rate" className="block text-sm font-medium text-gray-600 mb-1">Rate (₹)</label>
+            <input
+              type="number"
+              id="rate"
+              min="0"
+              step="0.01"
+              value={rate}
+              onChange={(e) => setRate(e.target.value)}
+              placeholder="Enter rate"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition"
             />
           </div>
@@ -162,21 +194,21 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
               </tr>
             ) : (
               billItems.map(item => (
-                <tr key={item.product.id} className="border-b">
+                <tr key={item.lineId ?? `${item.product.id}-${item.product.price}`} className="border-b">
                   <td className="p-3 font-medium">{item.product.name}</td>
                   <td className="p-3 text-center">
                     <input 
                       type="number"
                       min="1"
                       value={item.quantity}
-                      onChange={(e) => handleQuantityChange(item.product.id, parseInt(e.target.value))}
+                      onChange={(e) => handleQuantityChange(item.lineId, parseInt(e.target.value))}
                       className="w-16 text-center border rounded py-1"
                     />
                   </td>
                   <td className="p-3 text-right">{item.product.price.toFixed(2)}</td>
                   <td className="p-3 text-right font-semibold">{(item.product.price * item.quantity).toFixed(2)}</td>
                   <td className="p-3 text-center">
-                    <button type="button" onClick={() => handleRemoveItem(item.product.id)} className="text-red-500 hover:text-red-700 p-1">
+                    <button type="button" onClick={() => handleRemoveItem(item.lineId)} className="text-red-500 hover:text-red-700 p-1">
                       <TrashIcon />
                     </button>
                   </td>

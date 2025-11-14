@@ -25,9 +25,11 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText }
       <div ref={invoiceRef} className="print-area">
         <header className="flex justify-between items-start pb-6 border-b-2 border-amber-800">
           <div>
-            <h1 className="text-3xl font-bold text-amber-900">ગુજરાતી શુદ્ધ તેલ</h1>
+            <h1 className="text-3xl font-bold text-amber-900">શુદ્ધ મગફળીનું તેલ</h1>
             <p className="text-gray-600">Pure Groundnut Oil</p>
-            <p className="text-xs text-gray-500 mt-2">123 Oil Mill Road, Rajkot, Gujarat</p>
+            <p className="text-xs text-gray-500 mt-2">શ્રીયમ હેરિટેજ ફ્લેટ્સ અને દુકાનો, <br></br>
+બાકરોલ સર્કલ પાસે, સરદાર પટેલ રિંગ રોડ, <br></br>
+બાકરોલ બાદ્રાબાદ, અમદાવાદ, ગુજરાત ૩૮૨૨૧૦</p>
           </div>
           <div className="text-right">
             <h2 className="text-2xl font-bold text-gray-700">INVOICE</h2>
@@ -59,7 +61,7 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText }
             </thead>
             <tbody>
               {invoiceData.items.map((item, index) => (
-                <tr key={item.product.id} className="border-b border-gray-200">
+                <tr key={item.lineId ?? `${item.product.id}-${index}`} className="border-b border-gray-200">
                   <td className="p-3">{index + 1}</td>
                   <td className="p-3 font-medium">{item.product.name}</td>
                   <td className="p-3 text-center">{item.quantity}</td>
@@ -90,7 +92,6 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText }
 
         <footer className="mt-12 pt-6 border-t border-gray-200 text-center">
             <p className="text-sm text-gray-600">Thank you for your business!</p>
-            <p className="text-xs text-gray-400 mt-1">This is a computer-generated invoice.</p>
         </footer>
       </div>
 
