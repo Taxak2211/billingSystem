@@ -73,44 +73,83 @@ const BillHistory: React.FC<BillHistoryProps> = ({ user, onViewInvoice }) => {
         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
       />
       
-      <div className="overflow-x-auto overflow-y-auto flex-1">
-        <table className="w-full text-left">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-3 text-sm font-semibold text-gray-600">Date</th>
-              <th className="p-3 text-sm font-semibold text-gray-600">Invoice #</th>
-              <th className="p-3 text-sm font-semibold text-gray-600">Customer</th>
-              <th className="p-3 text-sm font-semibold text-gray-600 text-right">Amount (₹)</th>
-              <th className="p-3 text-sm font-semibold text-gray-600 text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredInvoices.length === 0 ? (
+      <div className="space-y-4 flex-1 overflow-y-auto">
+        {/* Desktop Table View - Hidden on mobile */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-gray-100">
               <tr>
-                <td colSpan={5} className="text-center p-8 text-gray-500">
-                  {searchTerm ? 'No matching invoices found.' : 'No invoices found.'}
-                </td>
+                <th className="p-3 text-sm font-semibold text-gray-600">Date</th>
+                <th className="p-3 text-sm font-semibold text-gray-600">Invoice #</th>
+                <th className="p-3 text-sm font-semibold text-gray-600">Customer</th>
+                <th className="p-3 text-sm font-semibold text-gray-600 text-right">Amount (₹)</th>
+                <th className="p-3 text-sm font-semibold text-gray-600 text-center">Action</th>
               </tr>
-            ) : (
-              filteredInvoices.map(invoice => (
-                <tr key={invoice.id} className="border-b hover:bg-amber-50/50">
-                  <td className="p-3">{invoice.date.toLocaleDateString('en-IN')}</td>
-                  <td className="p-3 font-mono text-xs">{invoice.invoiceNumber}</td>
-                  <td className="p-3 font-medium">{invoice.customerName}</td>
-                  <td className="p-3 text-right font-semibold">{invoice.grandTotal.toFixed(2)}</td>
-                  <td className="p-3 text-center">
-                    <button 
-                      onClick={() => onViewInvoice(invoice)}
-                      className="px-4 py-1 bg-amber-600 text-white text-sm font-semibold rounded-md hover:bg-amber-700 transition"
-                    >
-                      View
-                    </button>
+            </thead>
+            <tbody>
+              {filteredInvoices.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-center p-8 text-gray-500">
+                    {searchTerm ? 'No matching invoices found.' : 'No invoices found.'}
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                filteredInvoices.map(invoice => (
+                  <tr key={invoice.id} className="border-b hover:bg-amber-50/50">
+                    <td className="p-3">{invoice.date.toLocaleDateString('en-IN')}</td>
+                    <td className="p-3 font-mono text-xs">{invoice.invoiceNumber}</td>
+                    <td className="p-3 font-medium">{invoice.customerName}</td>
+                    <td className="p-3 text-right font-semibold">{invoice.grandTotal.toFixed(2)}</td>
+                    <td className="p-3 text-center">
+                      <button 
+                        onClick={() => onViewInvoice(invoice)}
+                        className="px-4 py-1 bg-amber-600 text-white text-sm font-semibold rounded-md hover:bg-amber-700 transition"
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Mobile Card View - Visible only on mobile */}
+        <div className="md:hidden space-y-3">
+          {filteredInvoices.length === 0 ? (
+            <div className="text-center p-8 text-gray-500 bg-gray-50 rounded-lg">
+              {searchTerm ? 'No matching invoices found.' : 'No invoices found.'}
+            </div>
+          ) : (
+            filteredInvoices.map(invoice => (
+              <div key={invoice.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-800">{invoice.customerName}</h3>
+                    <p className="text-xs font-mono text-gray-600 mt-1">{invoice.invoiceNumber}</p>
+                  </div>
+                  <button 
+                    onClick={() => onViewInvoice(invoice)}
+                    className="px-3 py-1 bg-amber-600 text-white text-xs font-semibold rounded-md hover:bg-amber-700 transition"
+                  >
+                    View
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <span className="text-gray-600">Date:</span>
+                    <p className="font-medium">{invoice.date.toLocaleDateString('en-IN')}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-gray-600">Amount:</span>
+                    <p className="font-bold text-amber-900">₹{invoice.grandTotal.toFixed(2)}</p>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

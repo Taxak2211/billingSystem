@@ -174,49 +174,92 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
       </div>
       
       {/* Bill Items Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-3 text-sm font-semibold text-gray-600">Product</th>
-              <th className="p-3 text-sm font-semibold text-gray-600 text-center">Quantity</th>
-              <th className="p-3 text-sm font-semibold text-gray-600 text-right">Rate (₹)</th>
-              <th className="p-3 text-sm font-semibold text-gray-600 text-right">Amount (₹)</th>
-              <th className="p-3 text-sm font-semibold text-gray-600 text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {billItems.length === 0 ? (
+      <div className="space-y-4">
+        {/* Desktop Table View - Hidden on mobile */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-gray-100">
               <tr>
-                <td colSpan={5} className="text-center p-8 text-gray-500">
-                  No items added yet.
-                </td>
+                <th className="p-3 text-sm font-semibold text-gray-600">Product</th>
+                <th className="p-3 text-sm font-semibold text-gray-600 text-center">Quantity</th>
+                <th className="p-3 text-sm font-semibold text-gray-600 text-right">Rate (₹)</th>
+                <th className="p-3 text-sm font-semibold text-gray-600 text-right">Amount (₹)</th>
+                <th className="p-3 text-sm font-semibold text-gray-600 text-center">Action</th>
               </tr>
-            ) : (
-              billItems.map(item => (
-                <tr key={item.lineId ?? `${item.product.id}-${item.product.price}`} className="border-b">
-                  <td className="p-3 font-medium">{item.product.name}</td>
-                  <td className="p-3 text-center">
+            </thead>
+            <tbody>
+              {billItems.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-center p-8 text-gray-500">
+                    No items added yet.
+                  </td>
+                </tr>
+              ) : (
+                billItems.map(item => (
+                  <tr key={item.lineId ?? `${item.product.id}-${item.product.price}`} className="border-b">
+                    <td className="p-3 font-medium">{item.product.name}</td>
+                    <td className="p-3 text-center">
+                      <input 
+                        type="number"
+                        min="1"
+                        value={item.quantity}
+                        onChange={(e) => handleQuantityChange(item.lineId, parseInt(e.target.value))}
+                        className="w-16 text-center border rounded py-1"
+                      />
+                    </td>
+                    <td className="p-3 text-right">{item.product.price.toFixed(2)}</td>
+                    <td className="p-3 text-right font-semibold">{(item.product.price * item.quantity).toFixed(2)}</td>
+                    <td className="p-3 text-center">
+                      <button type="button" onClick={() => handleRemoveItem(item.lineId)} className="text-red-500 hover:text-red-700 p-1">
+                        <TrashIcon />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Mobile Card View - Visible only on mobile */}
+        <div className="md:hidden space-y-3">
+          {billItems.length === 0 ? (
+            <div className="text-center p-8 text-gray-500 bg-gray-50 rounded-lg">
+              No items added yet.
+            </div>
+          ) : (
+            billItems.map(item => (
+              <div key={item.lineId ?? `${item.product.id}-${item.product.price}`} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="font-semibold text-gray-800 flex-1">{item.product.name}</h3>
+                  <button type="button" onClick={() => handleRemoveItem(item.lineId)} className="text-red-500 hover:text-red-700 ml-2">
+                    <TrashIcon />
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="text-gray-600">Quantity:</span>
                     <input 
                       type="number"
                       min="1"
                       value={item.quantity}
                       onChange={(e) => handleQuantityChange(item.lineId, parseInt(e.target.value))}
-                      className="w-16 text-center border rounded py-1"
+                      className="w-20 ml-2 text-center border rounded py-1 px-2"
                     />
-                  </td>
-                  <td className="p-3 text-right">{item.product.price.toFixed(2)}</td>
-                  <td className="p-3 text-right font-semibold">{(item.product.price * item.quantity).toFixed(2)}</td>
-                  <td className="p-3 text-center">
-                    <button type="button" onClick={() => handleRemoveItem(item.lineId)} className="text-red-500 hover:text-red-700 p-1">
-                      <TrashIcon />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-gray-600">Rate:</span>
+                    <span className="ml-2 font-medium">₹{item.product.price.toFixed(2)}</span>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-gray-300 text-right">
+                  <span className="text-gray-600 text-sm">Amount:</span>
+                  <span className="ml-2 font-bold text-lg text-amber-900">₹{(item.product.price * item.quantity).toFixed(2)}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       {/* Totals Section */}

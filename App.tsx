@@ -173,11 +173,11 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-amber-50/50 font-sans text-gray-800 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
-        <header className="flex flex-wrap justify-between items-center mb-8 gap-4 no-print">
-            <div className="flex items-center gap-4">
+        <header className="mb-8 no-print">
+            <div className="flex items-center gap-2 sm:gap-4 mb-4">
               {/* Logo */}
               <div className="shrink-0">
-                <svg width="150" height="150" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                <svg className="w-20 h-20 md:w-32 md:h-32 lg:w-[150px] lg:h-[150px]" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
                   {/* Background circle */}
                   <circle cx="200" cy="200" r="190" fill="#2D5016" opacity="0.1"/>
                   
@@ -229,16 +229,16 @@ const App: React.FC = () => {
                         textAnchor="middle" fill="#666" fontStyle="italic">શુદ્ધતા અને ગુણવત્તા</text>
                 </svg>
               </div>
-              <div className="text-center sm:text-left">
-                <h1 className="text-4xl sm:text-5xl font-bold text-amber-900 tracking-tight">બાપા સીતારામ મીની ઓઈલ મીલ</h1>
-                <p className="text-lg text-amber-700 mt-2">બિલિંગ સિસ્ટમ</p>
+              <div className="flex-1">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-amber-900 tracking-tight">બાપા સીતારામ મીની ઓઈલ મીલ</h1>
+                <p className="text-base md:text-lg text-amber-700 mt-2">બિલિંગ સિસ્ટમ</p>
               </div>
             </div>
-            <nav className="flex items-center justify-end gap-2 sm:gap-4 no-print ml-auto">
-              <button onClick={() => switchView('form')} className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition ${view === 'form' && !currentInvoice ? 'bg-amber-600 text-white' : 'bg-white hover:bg-amber-100'}`}><NewBillIcon /> New Bill</button>
-              <button onClick={() => switchView('history')} className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition ${view === 'history' && !currentInvoice ? 'bg-amber-600 text-white' : 'bg-white hover:bg-amber-100'}`}><HistoryIcon /> History</button>
-              <button onClick={() => switchView('products')} className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition ${view === 'products' && !currentInvoice ? 'bg-amber-600 text-white' : 'bg-white hover:bg-amber-100'}`}>Products</button>
-              <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-white hover:bg-red-100 text-red-600"><LogoutIcon /> Logout</button>
+            <nav className="flex flex-wrap items-center justify-start md:justify-end gap-2 md:gap-4">
+              <button onClick={() => switchView('form')} className={`flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition ${view === 'form' && !currentInvoice ? 'bg-amber-600 text-white' : 'bg-white hover:bg-amber-100'}`}><NewBillIcon /><span className="md:hidden">Bill</span><span className="hidden md:inline">New Bill</span></button>
+              <button onClick={() => switchView('history')} className={`flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition ${view === 'history' && !currentInvoice ? 'bg-amber-600 text-white' : 'bg-white hover:bg-amber-100'}`}><HistoryIcon /><span>History</span></button>
+              <button onClick={() => switchView('products')} className={`flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition ${view === 'products' && !currentInvoice ? 'bg-amber-600 text-white' : 'bg-white hover:bg-amber-100'}`}><span>Products</span></button>
+              <button onClick={handleLogout} className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 text-xs md:text-sm font-semibold rounded-lg bg-white hover:bg-red-100 text-red-600"><LogoutIcon /><span className="md:hidden">Exit</span><span className="hidden md:inline">Logout</span></button>
             </nav>
         </header>
 

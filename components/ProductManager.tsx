@@ -106,44 +106,78 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, onAddProduct,
           className="w-full px-4 py-2 mb-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
         />
         
-        <div className="overflow-x-auto overflow-y-auto flex-1">
-          <table className="w-full text-left">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-3 text-sm font-semibold text-gray-600">ID</th>
-                <th className="p-3 text-sm font-semibold text-gray-600">Product Name</th>
-                <th className="p-3 text-sm font-semibold text-gray-600 text-right">Price (₹)</th>
-                <th className="p-3 text-sm font-semibold text-gray-600 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProducts.length === 0 ? (
+        <div className="space-y-4 overflow-y-auto flex-1">
+          {/* Desktop Table View - Hidden on mobile */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-gray-100">
                 <tr>
-                  <td colSpan={4} className="text-center p-8 text-gray-500">
-                    {searchTerm ? 'No matching products found.' : 'No products yet. Add your first product above.'}
-                  </td>
+                  <th className="p-3 text-sm font-semibold text-gray-600">ID</th>
+                  <th className="p-3 text-sm font-semibold text-gray-600">Product Name</th>
+                  <th className="p-3 text-sm font-semibold text-gray-600 text-right">Price (₹)</th>
+                  <th className="p-3 text-sm font-semibold text-gray-600 text-center">Action</th>
                 </tr>
-              ) : (
-                filteredProducts.map((p) => (
-                  <tr key={p.id} className="border-b hover:bg-gray-50">
-                    <td className="p-3 text-gray-600">{p.id}</td>
-                    <td className="p-3 font-medium">{p.name}</td>
-                    <td className="p-3 text-right">{p.price.toFixed(2)}</td>
-                    <td className="p-3 text-center">
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteProduct(p.id, p.docId)}
-                        className="inline-flex items-center gap-1 px-3 py-1 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition"
-                      >
-                        <TrashIcon />
-                        Delete
-                      </button>
+              </thead>
+              <tbody>
+                {filteredProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="text-center p-8 text-gray-500">
+                      {searchTerm ? 'No matching products found.' : 'No products yet. Add your first product above.'}
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  filteredProducts.map((p) => (
+                    <tr key={p.id} className="border-b hover:bg-gray-50">
+                      <td className="p-3 text-gray-600">{p.id}</td>
+                      <td className="p-3 font-medium">{p.name}</td>
+                      <td className="p-3 text-right">{p.price.toFixed(2)}</td>
+                      <td className="p-3 text-center">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteProduct(p.id, p.docId)}
+                          className="inline-flex items-center gap-1 px-3 py-1 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition"
+                        >
+                          <TrashIcon />
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Mobile Card View - Visible only on mobile */}
+          <div className="md:hidden space-y-3">
+            {filteredProducts.length === 0 ? (
+              <div className="text-center p-8 text-gray-500 bg-gray-50 rounded-lg">
+                {searchTerm ? 'No matching products found.' : 'No products yet. Add your first product above.'}
+              </div>
+            ) : (
+              filteredProducts.map((p) => (
+                <div key={p.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-800">{p.name}</h3>
+                      <p className="text-xs text-gray-600 mt-1">ID: {p.id}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteProduct(p.id, p.docId)}
+                      className="text-red-600 hover:text-red-700 p-1"
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
+                  <div className="flex justify-between items-center pt-3 border-t border-gray-300">
+                    <span className="text-gray-600 text-sm">Price:</span>
+                    <span className="font-bold text-lg text-amber-900">₹{p.price.toFixed(2)}</span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
