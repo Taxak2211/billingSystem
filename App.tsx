@@ -90,8 +90,8 @@ const App: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  // FIX: Separated invoice data for Firestore from local state to resolve Timestamp type mismatch.
-  const handleGenerateBill = async (customerName: string, customerPhone: string, billItems: BillItem[]) => {
+  // Generate invoice preview without saving to database
+  const handleGenerateBill = (customerName: string, customerPhone: string, billItems: BillItem[]) => {
     if (!user) {
       alert("You must be logged in to generate a bill.");
       return;
@@ -101,7 +101,7 @@ const App: React.FC = () => {
     const grandTotal = subtotal + gstAmount;
 
     const invoiceBaseData = {
-      invoiceNumber: `GST-${Date.now()}`,
+      invoiceNumber: `BSMOM-${Date.now()}`,
       date: new Date(),
       customerName,
       customerPhone,
@@ -112,15 +112,27 @@ const App: React.FC = () => {
       userId: user.uid,
     };
     
+    setCurrentInvoice(invoiceBaseData);
+  };
+
+  // Save invoice to Firestore when user prints
+  const handleSaveInvoice = async (invoiceData: InvoiceData) => {
+    if (!user) {
+      alert("You must be logged in to save a bill.");
+      return;
+    }
+    
     try {
       const docRef = await addDoc(collection(db, 'invoices'), {
-        ...invoiceBaseData,
+        ...invoiceData,
         createdAt: serverTimestamp(),
       });
-      setCurrentInvoice({ ...invoiceBaseData, id: docRef.id });
+      setCurrentInvoice({ ...invoiceData, id: docRef.id });
+      return true;
     } catch (error) {
       console.error("Error adding document: ", error);
       alert("Failed to save the invoice. Please try again.");
+      return false;
     }
   };
 
@@ -161,7 +173,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-amber-50/50 font-sans text-gray-800 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
-        <header className="flex flex-wrap justify-between items-center mb-8 gap-4">
+        <header className="flex flex-wrap justify-between items-center mb-8 gap-4 no-print">
             <div className="text-center sm:text-left">
               <h1 className="text-4xl sm:text-5xl font-bold text-amber-900 tracking-tight">બાપા સીતારામ મીની ઓઈલ મીલ</h1>
               <p className="text-lg text-amber-700 mt-2">બિલિંગ સિસ્ટમ</p>
@@ -176,7 +188,7 @@ const App: React.FC = () => {
 
         <main>
             {currentInvoice ? (
-            <Invoice invoiceData={currentInvoice} onBack={handleBack} backButtonText={view === 'history' ? 'Back to History' : 'Create New Bill'} />
+            <Invoice invoiceData={currentInvoice} onBack={handleBack} backButtonText={view === 'history' ? 'Back to History' : 'Create New Bill'} onSave={handleSaveInvoice} />
           ) : view === 'form' ? (
             <BillingForm products={products} onGenerateBill={handleGenerateBill} />
           ) : view === 'products' ? (
@@ -185,7 +197,7 @@ const App: React.FC = () => {
             <BillHistory user={user} onViewInvoice={handleViewInvoice} />
           )}
         </main>
-        <footer className="text-center mt-12 text-sm text-gray-500">
+        <footer className="text-center mt-12 text-sm text-gray-500 no-print">
             <p>&copy; {new Date().getFullYear()} બાપા સીતારામ મીની ઓઈલ મીલ. All Rights Reserved.</p>
         </footer>
       </div>
