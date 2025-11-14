@@ -170,7 +170,7 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, 
           onClick={handlePrint}
           className="px-6 py-2 bg-amber-600 text-white font-semibold rounded-lg hover:bg-amber-700 transition"
         >
-          Save & Print Invoice
+          {invoiceData.id ? 'Print Invoice' : 'Save & Print Invoice'}
         </button>
       </div>
     </div>

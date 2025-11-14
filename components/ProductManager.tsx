@@ -12,6 +12,7 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, onAddProduct,
   const [newProdName, setNewProdName] = useState('');
   const [newProdPrice, setNewProdPrice] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleAddProduct = () => {
     const name = newProdName.trim();
@@ -36,8 +37,15 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, onAddProduct,
     }
   };
 
+  // Filter products based on search term
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.id.toString().includes(searchTerm) ||
+    product.price.toString().includes(searchTerm)
+  );
+
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg space-y-6">
+    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg space-y-6 max-h-[80vh] flex flex-col">
       <div className="border-b border-gray-200 pb-4">
         <h2 className="text-2xl font-semibold text-gray-700">Product Management</h2>
         <p className="text-sm text-gray-500 mt-1">Add, edit, or remove products from your catalog</p>
@@ -86,9 +94,19 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, onAddProduct,
       </div>
 
       {/* Products List */}
-      <div>
+      <div className="flex flex-col flex-1 overflow-hidden">
         <h3 className="text-lg font-semibold text-gray-700 mb-3">Product List ({products.length})</h3>
-        <div className="overflow-x-auto">
+        
+        {/* Search Input */}
+        <input
+          type="text"
+          placeholder="Search by product name, ID, or price..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-4 py-2 mb-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+        />
+        
+        <div className="overflow-x-auto overflow-y-auto flex-1">
           <table className="w-full text-left">
             <thead className="bg-gray-100">
               <tr>
@@ -99,14 +117,14 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, onAddProduct,
               </tr>
             </thead>
             <tbody>
-              {products.length === 0 ? (
+              {filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="text-center p-8 text-gray-500">
-                    No products yet. Add your first product above.
+                    {searchTerm ? 'No matching products found.' : 'No products yet. Add your first product above.'}
                   </td>
                 </tr>
               ) : (
-                products.map((p) => (
+                filteredProducts.map((p) => (
                   <tr key={p.id} className="border-b hover:bg-gray-50">
                     <td className="p-3 text-gray-600">{p.id}</td>
                     <td className="p-3 font-medium">{p.name}</td>

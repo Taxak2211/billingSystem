@@ -174,11 +174,67 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-amber-50/50 font-sans text-gray-800 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
         <header className="flex flex-wrap justify-between items-center mb-8 gap-4 no-print">
-            <div className="text-center sm:text-left">
-              <h1 className="text-4xl sm:text-5xl font-bold text-amber-900 tracking-tight">બાપા સીતારામ મીની ઓઈલ મીલ</h1>
-              <p className="text-lg text-amber-700 mt-2">બિલિંગ સિસ્ટમ</p>
+            <div className="flex items-center gap-4">
+              {/* Logo */}
+              <div className="shrink-0">
+                <svg width="150" height="150" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                  {/* Background circle */}
+                  <circle cx="200" cy="200" r="190" fill="#2D5016" opacity="0.1"/>
+                  
+                  {/* Outer decorative circle */}
+                  <circle cx="200" cy="200" r="170" fill="none" stroke="#D4A522" strokeWidth="3"/>
+                  
+                  {/* Oil drop icon */}
+                  <g transform="translate(200, 140)">
+                    {/* Main oil drop */}
+                    <path d="M 0,-50 C -20,-50 -35,-35 -35,-15 C -35,10 0,50 0,50 C 0,50 35,10 35,-15 C 35,-35 20,-50 0,-50 Z" 
+                          fill="#D4A522" stroke="#2D5016" strokeWidth="2"/>
+                    
+                    {/* Shine effect on drop */}
+                    <ellipse cx="-8" cy="-20" rx="8" ry="12" fill="#FFF" opacity="0.4"/>
+                    
+                    {/* Small drops */}
+                    <circle cx="-45" cy="0" r="6" fill="#D4A522" opacity="0.7"/>
+                    <circle cx="45" cy="0" r="6" fill="#D4A522" opacity="0.7"/>
+                    <circle cx="-55" cy="20" r="4" fill="#D4A522" opacity="0.5"/>
+                    <circle cx="55" cy="20" r="4" fill="#D4A522" opacity="0.5"/>
+                  </g>
+                  
+                  {/* Leaf elements for natural/pure theme */}
+                  <g transform="translate(120, 120) rotate(-30)">
+                    <path d="M 0,0 Q 10,-15 0,-30" fill="none" stroke="#4A7C2E" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M 0,-30 Q 15,-22 12,-10 Q 8,-5 0,0" fill="#5A9B3A" opacity="0.7"/>
+                    <path d="M 0,-30 Q -15,-22 -12,-10 Q -8,-5 0,0" fill="#6BAF4A" opacity="0.7"/>
+                  </g>
+                  
+                  <g transform="translate(280, 120) rotate(30) scale(-1, 1)">
+                    <path d="M 0,0 Q 10,-15 0,-30" fill="none" stroke="#4A7C2E" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M 0,-30 Q 15,-22 12,-10 Q 8,-5 0,0" fill="#5A9B3A" opacity="0.7"/>
+                    <path d="M 0,-30 Q -15,-22 -12,-10 Q -8,-5 0,0" fill="#6BAF4A" opacity="0.7"/>
+                  </g>
+                  
+                  {/* Gujarati Text */}
+                  <text x="200" y="255" fontFamily="'Noto Sans Gujarati', Arial" fontSize="28" fontWeight="700" 
+                        textAnchor="middle" fill="#2D5016">બાપા સીતારામ</text>
+                  
+                  <text x="200" y="285" fontFamily="'Noto Sans Gujarati', Arial" fontSize="22" fontWeight="600" 
+                        textAnchor="middle" fill="#4A7C2E">મીની ઓઈલ મીલ</text>
+                  
+                  {/* Decorative bottom element */}
+                  <line x1="120" y1="310" x2="280" y2="310" stroke="#D4A522" strokeWidth="2" opacity="0.6"/>
+                  <circle cx="200" cy="310" r="4" fill="#D4A522"/>
+                  
+                  {/* Tagline in Gujarati */}
+                  <text x="200" y="330" fontFamily="'Noto Sans Gujarati', Arial" fontSize="12" 
+                        textAnchor="middle" fill="#666" fontStyle="italic">શુદ્ધતા અને ગુણવત્તા</text>
+                </svg>
+              </div>
+              <div className="text-center sm:text-left">
+                <h1 className="text-4xl sm:text-5xl font-bold text-amber-900 tracking-tight">બાપા સીતારામ મીની ઓઈલ મીલ</h1>
+                <p className="text-lg text-amber-700 mt-2">બિલિંગ સિસ્ટમ</p>
+              </div>
             </div>
-            <nav className="flex items-center gap-2 sm:gap-4 no-print">
+            <nav className="flex items-center justify-end gap-2 sm:gap-4 no-print ml-auto">
               <button onClick={() => switchView('form')} className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition ${view === 'form' && !currentInvoice ? 'bg-amber-600 text-white' : 'bg-white hover:bg-amber-100'}`}><NewBillIcon /> New Bill</button>
               <button onClick={() => switchView('history')} className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition ${view === 'history' && !currentInvoice ? 'bg-amber-600 text-white' : 'bg-white hover:bg-amber-100'}`}><HistoryIcon /> History</button>
               <button onClick={() => switchView('products')} className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition ${view === 'products' && !currentInvoice ? 'bg-amber-600 text-white' : 'bg-white hover:bg-amber-100'}`}>Products</button>

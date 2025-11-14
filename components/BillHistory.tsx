@@ -13,6 +13,7 @@ const BillHistory: React.FC<BillHistoryProps> = ({ user, onViewInvoice }) => {
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -52,10 +53,27 @@ const BillHistory: React.FC<BillHistoryProps> = ({ user, onViewInvoice }) => {
     return <div className="text-center p-8 bg-red-100 text-red-700 rounded-2xl shadow-lg">{error}</div>;
   }
 
+  // Filter invoices based on search term
+  const filteredInvoices = invoices.filter(invoice => 
+    invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    invoice.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    invoice.date.toLocaleDateString('en-IN').includes(searchTerm)
+  );
+
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg space-y-6">
+    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg space-y-6 max-h-[80vh] flex flex-col">
       <h2 className="text-xl font-semibold text-gray-700">Invoice History</h2>
-      <div className="overflow-x-auto">
+      
+      {/* Search Input */}
+      <input
+        type="text"
+        placeholder="Search by invoice #, customer name, or date..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+      />
+      
+      <div className="overflow-x-auto overflow-y-auto flex-1">
         <table className="w-full text-left">
           <thead className="bg-gray-100">
             <tr>
@@ -67,14 +85,14 @@ const BillHistory: React.FC<BillHistoryProps> = ({ user, onViewInvoice }) => {
             </tr>
           </thead>
           <tbody>
-            {invoices.length === 0 ? (
+            {filteredInvoices.length === 0 ? (
               <tr>
                 <td colSpan={5} className="text-center p-8 text-gray-500">
-                  No invoices found.
+                  {searchTerm ? 'No matching invoices found.' : 'No invoices found.'}
                 </td>
               </tr>
             ) : (
-              invoices.map(invoice => (
+              filteredInvoices.map(invoice => (
                 <tr key={invoice.id} className="border-b hover:bg-amber-50/50">
                   <td className="p-3">{invoice.date.toLocaleDateString('en-IN')}</td>
                   <td className="p-3 font-mono text-xs">{invoice.invoiceNumber}</td>
