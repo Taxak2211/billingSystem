@@ -229,32 +229,32 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
             </div>
           ) : (
             billItems.map(item => (
-              <div key={item.lineId ?? `${item.product.id}-${item.product.price}`} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <div key={item.lineId ?? `${item.product.id}-${item.product.price}`} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
                 <div className="flex justify-between items-start mb-3">
-                  <h3 className="font-semibold text-gray-800 flex-1">{item.product.name}</h3>
-                  <button type="button" onClick={() => handleRemoveItem(item.lineId)} className="text-red-500 hover:text-red-700 ml-2">
+                  <h3 className="font-semibold text-gray-800 flex-1 text-sm">{item.product.name}</h3>
+                  <button type="button" onClick={() => handleRemoveItem(item.lineId)} className="text-red-500 hover:text-red-700 ml-2 flex-shrink-0">
                     <TrashIcon />
                   </button>
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between items-center">
                     <span className="text-gray-600">Quantity:</span>
                     <input 
                       type="number"
                       min="1"
                       value={item.quantity}
                       onChange={(e) => handleQuantityChange(item.lineId, parseInt(e.target.value))}
-                      className="w-20 ml-2 text-center border rounded py-1 px-2"
+                      className="w-16 text-center border border-gray-300 rounded py-1 px-2 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                     />
                   </div>
-                  <div className="text-right">
+                  <div className="flex justify-between items-center">
                     <span className="text-gray-600">Rate:</span>
-                    <span className="ml-2 font-medium">₹{item.product.price.toFixed(2)}</span>
+                    <span className="font-medium">₹{item.product.price.toFixed(2)}</span>
                   </div>
-                </div>
-                <div className="mt-3 pt-3 border-t border-gray-300 text-right">
-                  <span className="text-gray-600 text-sm">Amount:</span>
-                  <span className="ml-2 font-bold text-lg text-amber-900">₹{(item.product.price * item.quantity).toFixed(2)}</span>
+                  <div className="flex justify-between items-center pt-2 border-t border-gray-300">
+                    <span className="text-gray-600 font-medium">Amount:</span>
+                    <span className="font-bold text-base text-amber-900">₹{(item.product.price * item.quantity).toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
             ))

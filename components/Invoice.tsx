@@ -29,13 +29,13 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, 
 
 
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+    <div className="bg-white p-3 sm:p-6 md:p-8 rounded-2xl shadow-lg">
       <div ref={invoiceRef} className="print-area">
-        <header className="flex justify-between items-start pb-6 border-b-2 border-amber-800">
-          <div className="flex gap-4 items-start">
+        <header className="flex flex-col sm:flex-row justify-between items-start pb-4 sm:pb-6 border-b-2 border-amber-800 gap-4">
+          <div className="flex gap-2 sm:gap-4 items-start w-full sm:w-auto">
             {/* Logo */}
-            <div className="shrink-0">
-              <svg width="100" height="100" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+            <div className="shrink-0 mt-1">
+              <svg width="60" height="60" className="sm:w-[80px] sm:h-[80px] md:w-[100px] md:h-[100px]" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
                 {/* Background circle */}
                 <circle cx="200" cy="200" r="190" fill="#2D5016" opacity="0.1"/>
                 
@@ -87,32 +87,61 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, 
                       textAnchor="middle" fill="#666" fontStyle="italic">શુદ્ધતા અને ગુણવત્તા</text>
               </svg>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-amber-900">શુદ્ધ મગફળીનું તેલ</h1>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-amber-900">શુદ્ધ મગફળીનું તેલ</h1>
               
-              <p className="text-xs text-gray-500 mt-2">શ્રીયમ હેરિટેજ ફ્લેટ્સ ની પાછળ, <br></br>
+              <p className="text-[10px] sm:text-xs text-gray-500 mt-1 sm:mt-2 leading-tight">શ્રીયમ હેરિટેજ ફ્લેટ્સ ની પાછળ, <br></br>
                 સરદાર પટેલ રિંગ રોડ, બાકરોલ(બાદ્રાબાદ) સર્કલ પાસે<br></br>
                 અમદાવાદ, ગુજરાત ૩૮૨૨૧૦</p>
             </div>
           </div>
-          <div className="text-right">
-            <h2 className="text-2xl font-bold text-gray-700">INVOICE</h2>
-            <p className="text-sm text-gray-600 mt-1">
+          <div className="text-left sm:text-right w-full sm:w-auto">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-700">INVOICE</h2>
+            <p className="text-xs sm:text-sm text-gray-600 mt-1">
               <strong>Invoice #:</strong> {invoiceData.invoiceNumber}
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs sm:text-sm text-gray-600">
               <strong>Date:</strong> {formattedDate}
             </p>
           </div>
         </header>
 
-        <section className="my-6">
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">Bill To:</h3>
-          <p className="font-medium text-gray-800">{invoiceData.customerName}</p>
-          {invoiceData.customerPhone && <p className="text-gray-600">{invoiceData.customerPhone}</p>}
+        <section className="my-4 sm:my-6">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-1 sm:mb-2">Bill To:</h3>
+          <p className="text-sm sm:text-base font-medium text-gray-800">{invoiceData.customerName}</p>
+          {invoiceData.customerPhone && <p className="text-sm sm:text-base text-gray-600">{invoiceData.customerPhone}</p>}
         </section>
 
-        <section className="overflow-x-auto">
+        {/* Mobile: Card Layout */}
+        <section className="block sm:hidden space-y-3">
+          {invoiceData.items.map((item, index) => (
+            <div key={item.lineId ?? `${item.product.id}-${index}`} className="bg-amber-50 rounded-lg p-3 border border-amber-200">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex-1">
+                  <div className="text-xs text-gray-500">#{index + 1}</div>
+                  <div className="font-semibold text-sm text-gray-800">{item.product.name}</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div>
+                  <div className="text-gray-500">Qty</div>
+                  <div className="font-medium">{item.quantity}</div>
+                </div>
+                <div>
+                  <div className="text-gray-500">Rate</div>
+                  <div className="font-medium">₹{item.product.price.toFixed(2)}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-gray-500">Amount</div>
+                  <div className="font-semibold text-amber-900">₹{(item.product.price * item.quantity).toFixed(2)}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </section>
+
+        {/* Desktop: Table Layout */}
+        <section className="hidden sm:block">
           <table className="w-full text-left">
             <thead className="bg-amber-100 text-amber-900">
               <tr>
@@ -137,8 +166,8 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, 
           </table>
         </section>
 
-        <section className="mt-8 flex justify-end">
-          <div className="w-full max-w-xs space-y-3 text-gray-700">
+        <section className="mt-4 sm:mt-8 flex justify-end">
+          <div className="w-full max-w-xs space-y-2 sm:space-y-3 text-gray-700 text-sm sm:text-base">
             <div className="flex justify-between">
               <span>Subtotal</span>
               <span className="font-medium">₹ {invoiceData.subtotal.toFixed(2)}</span>
@@ -147,28 +176,28 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, 
               <span>GST ({GST_RATE * 100}%)</span>
               <span className="font-medium">₹ {invoiceData.gstAmount.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-xl font-bold text-amber-900 pt-2 border-t-2 border-gray-300">
+            <div className="flex justify-between text-lg sm:text-xl font-bold text-amber-900 pt-2 border-t-2 border-gray-300">
               <span>Total Amount</span>
               <span>₹ {invoiceData.grandTotal.toFixed(2)}</span>
             </div>
           </div>
         </section>
 
-        <footer className="mt-12 pt-6 border-t border-gray-200 text-center">
-            <p className="text-sm text-gray-600">Thank you for your business!</p>
+        <footer className="mt-6 sm:mt-12 pt-4 sm:pt-6 border-t border-gray-200 text-center">
+            <p className="text-xs sm:text-sm text-gray-600">Thank you for your business!</p>
         </footer>
       </div>
 
-      <div className="mt-8 flex justify-end gap-4 no-print">
+      <div className="mt-4 sm:mt-8 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 no-print">
         <button
           onClick={onBack}
-          className="px-6 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition"
+          className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition text-sm sm:text-base"
         >
           {backButtonText}
         </button>
         <button
           onClick={handlePrint}
-          className="px-6 py-2 bg-amber-600 text-white font-semibold rounded-lg hover:bg-amber-700 transition"
+          className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-2 bg-amber-600 text-white font-semibold rounded-lg hover:bg-amber-700 transition text-sm sm:text-base"
         >
           {invoiceData.id ? 'Print Invoice' : 'Save & Print Invoice'}
         </button>
