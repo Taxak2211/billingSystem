@@ -60,7 +60,7 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, onAddProduct,
             <input
               id="productName"
               type="text"
-              placeholder="e.g. Groundnut Oil - 1L Tin"
+              placeholder="e.g. Product Name"
               value={newProdName}
               onChange={(e) => setNewProdName(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition"
