@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { type User, onAuthStateChanged, signOut } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, addDoc as addFirestoreDoc, deleteDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, query, where, orderBy, addDoc as addFirestoreDoc, deleteDoc, doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 import BillingForm from './components/BillingForm';
@@ -56,12 +56,17 @@ const App: React.FC = () => {
   const [firmDetails, setFirmDetails] = useState<FirmDetails | null>(null);
   const [firmLoading, setFirmLoading] = useState(true);
 
-  // Load products from Firestore on mount
+  // Load products from Firestore when user is authenticated
   useEffect(() => {
     const loadProducts = async () => {
+      if (!user) {
+        setProducts([]);
+        return;
+      }
+      
       try {
         const productsRef = collection(db, 'products');
-        const q = query(productsRef, orderBy('id', 'asc'));
+        const q = query(productsRef, where('userId', '==', user.uid), orderBy('id', 'asc'));
         const snap = await getDocs(q);
         if (!snap.empty) {
           const loaded: Product[] = snap.docs.map(d => ({
@@ -71,14 +76,16 @@ const App: React.FC = () => {
             docId: d.id,
           }));
           setProducts(loaded);
+        } else {
+          setProducts([]);
         }
       } catch (err) {
-        console.error('Failed to load products, using defaults.', err);
-        setProducts(PRODUCTS);
+        console.error('Failed to load products:', err);
+        setProducts([]);
       }
     };
     loadProducts();
-  }, []);
+  }, [user]);
 
   // Update page title and favicon when firm details change
   useEffect(() => {
@@ -98,11 +105,21 @@ const App: React.FC = () => {
   }, [firmDetails]);
 
   const handleAddProduct = async (name: string, price: number) => {
+    if (!user) {
+      alert('You must be logged in to add products.');
+      return;
+    }
+    
     try {
       const maxId = products.reduce((m, p) => Math.max(m, p.id), 0);
       const nextId = maxId + 1;
       const productsRef = collection(db, 'products');
-      const docRef = await addFirestoreDoc(productsRef, { id: nextId, name, price });
+      const docRef = await addFirestoreDoc(productsRef, { 
+        id: nextId, 
+        name, 
+        price,
+        userId: user.uid 
+      });
       const newProd: Product = { id: nextId, name, price, docId: docRef.id };
       setProducts(prev => [...prev, newProd]);
     } catch (err) {

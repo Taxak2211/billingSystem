@@ -21,10 +21,12 @@ service cloud.firestore {
       allow delete: if isOwner(userId);
     }
     
-    // Products collection - authenticated users can read, write (add/delete)
-    // All authenticated users can manage products (since admin adds users manually)
+    // Products collection - users can only read/write their own products
     match /products/{productId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
     
     // Invoices collection - users can only read/write their own invoices
