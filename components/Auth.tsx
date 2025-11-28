@@ -29,8 +29,8 @@ const Auth: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-amber-50 p-4">
        <div className="text-center mb-8">
-            <h1 className="text-4xl sm:text-5xl font-bold text-amber-900 tracking-tight">બાપા સીતારામ મીની ઓઈલ મીલ</h1>
-            <p className="text-lg text-amber-700 mt-2">Billing System Login</p>
+            <h1 className="text-4xl sm:text-5xl font-bold text-amber-900 tracking-tight">Universal Billing System</h1>
+            <p className="text-lg text-amber-700 mt-2">Login to Continue</p>
         </div>
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>

@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { type InvoiceData } from '../types';
+import { type InvoiceData, type FirmDetails } from '../types';
 import { GST_RATE } from '../constants';
 
 interface InvoiceProps {
@@ -7,9 +7,10 @@ interface InvoiceProps {
   onBack: () => void;
   backButtonText: string;
   onSave?: (invoiceData: InvoiceData) => Promise<boolean | void>;
+  firmDetails: FirmDetails;
 }
 
-const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, onSave }) => {
+const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, onSave, firmDetails }) => {
   const invoiceRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = async () => {
@@ -27,6 +28,10 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, 
     ? invoiceData.date.toLocaleDateString('en-IN')
     : new Date(invoiceData.date).toLocaleDateString('en-IN');
 
+  const formattedTime = invoiceData.date instanceof Date 
+    ? invoiceData.date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
+    : new Date(invoiceData.date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
 
   return (
     <div className="bg-white p-3 sm:p-6 md:p-8 rounded-2xl shadow-lg">
@@ -34,65 +39,62 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, 
         <header className="flex flex-col sm:flex-row justify-between items-start pb-4 sm:pb-6 border-b-2 border-amber-800 gap-4">
           <div className="flex gap-2 sm:gap-4 items-start w-full sm:w-auto">
             {/* Logo */}
-            <div className="shrink-0 mt-1">
-              <svg width="60" height="60" className="sm:w-[80px] sm:h-[80px] md:w-[100px] md:h-[100px]" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-                {/* Background circle */}
-                <circle cx="200" cy="200" r="190" fill="#2D5016" opacity="0.1"/>
-                
-                {/* Outer decorative circle */}
-                <circle cx="200" cy="200" r="170" fill="none" stroke="#D4A522" strokeWidth="3"/>
-                
-                {/* Oil drop icon */}
-                <g transform="translate(200, 140)">
-                  {/* Main oil drop */}
-                  <path d="M 0,-50 C -20,-50 -35,-35 -35,-15 C -35,10 0,50 0,50 C 0,50 35,10 35,-15 C 35,-35 20,-50 0,-50 Z" 
-                        fill="#D4A522" stroke="#2D5016" strokeWidth="2"/>
-                  
-                  {/* Shine effect on drop */}
-                  <ellipse cx="-8" cy="-20" rx="8" ry="12" fill="#FFF" opacity="0.4"/>
-                  
-                  {/* Small drops */}
-                  <circle cx="-45" cy="0" r="6" fill="#D4A522" opacity="0.7"/>
-                  <circle cx="45" cy="0" r="6" fill="#D4A522" opacity="0.7"/>
-                  <circle cx="-55" cy="20" r="4" fill="#D4A522" opacity="0.5"/>
-                  <circle cx="55" cy="20" r="4" fill="#D4A522" opacity="0.5"/>
-                </g>
-                
-                {/* Leaf elements for natural/pure theme */}
-                <g transform="translate(120, 120) rotate(-30)">
-                  <path d="M 0,0 Q 10,-15 0,-30" fill="none" stroke="#4A7C2E" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M 0,-30 Q 15,-22 12,-10 Q 8,-5 0,0" fill="#5A9B3A" opacity="0.7"/>
-                  <path d="M 0,-30 Q -15,-22 -12,-10 Q -8,-5 0,0" fill="#6BAF4A" opacity="0.7"/>
-                </g>
-                
-                <g transform="translate(280, 120) rotate(30) scale(-1, 1)">
-                  <path d="M 0,0 Q 10,-15 0,-30" fill="none" stroke="#4A7C2E" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M 0,-30 Q 15,-22 12,-10 Q 8,-5 0,0" fill="#5A9B3A" opacity="0.7"/>
-                  <path d="M 0,-30 Q -15,-22 -12,-10 Q -8,-5 0,0" fill="#6BAF4A" opacity="0.7"/>
-                </g>
-                
-                {/* Gujarati Text */}
-                <text x="200" y="255" fontFamily="'Noto Sans Gujarati', Arial" fontSize="28" fontWeight="700" 
-                      textAnchor="middle" fill="#2D5016">બાપા સીતારામ</text>
-                
-                <text x="200" y="285" fontFamily="'Noto Sans Gujarati', Arial" fontSize="22" fontWeight="600" 
-                      textAnchor="middle" fill="#4A7C2E">મીની ઓઈલ મીલ</text>
-                
-                {/* Decorative bottom element */}
-                <line x1="120" y1="310" x2="280" y2="310" stroke="#D4A522" strokeWidth="2" opacity="0.6"/>
-                <circle cx="200" cy="310" r="4" fill="#D4A522"/>
-                
-                {/* Tagline in Gujarati */}
-                <text x="200" y="330" fontFamily="'Noto Sans Gujarati', Arial" fontSize="12" 
-                      textAnchor="middle" fill="#666" fontStyle="italic">શુદ્ધતા અને ગુણવત્તા</text>
-              </svg>
-            </div>
+            {firmDetails.displaySettings?.showLogoOnInvoice !== false && (
+              <div className="shrink-0 mt-1">
+                {firmDetails.logoUrl ? (
+                  <img 
+                    src={firmDetails.logoUrl} 
+                    alt={firmDetails.firmName}
+                    width="100"
+                    height="100"
+                    className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] md:w-[100px] md:h-[100px] object-contain bg-transparent"
+                  />
+                ) : (
+                  <div className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] md:w-[100px] md:h-[100px] flex items-center justify-center">
+                    <span className="text-2xl sm:text-3xl md:text-4xl font-bold text-amber-600">
+                      {firmDetails.firmName.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-amber-900">શુદ્ધ મગફળીનું તેલ</h1>
-              
-              <p className="text-[10px] sm:text-xs text-gray-500 mt-1 sm:mt-2 leading-tight">શ્રીયમ હેરિટેજ ફ્લેટ્સ ની પાછળ, <br></br>
-                સરદાર પટેલ રિંગ રોડ, બાકરોલ(બાદ્રાબાદ) સર્કલ પાસે<br></br>
-                અમદાવાદ, ગુજરાત ૩૮૨૨૧૦</p>
+              {/* Show firm names based on settings */}
+              {(firmDetails.displaySettings?.showFirmNameOnInvoice !== false || firmDetails.displaySettings?.showFirmNameLocalOnInvoice !== false) && (
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-amber-900">
+                  {firmDetails.displaySettings?.showFirmNameLocalOnInvoice !== false && firmDetails.firmNameLocal ? firmDetails.firmNameLocal : ''}
+                  {firmDetails.displaySettings?.showFirmNameOnInvoice !== false && firmDetails.displaySettings?.showFirmNameLocalOnInvoice !== false && firmDetails.firmNameLocal && firmDetails.firmName ? ' | ' : ''}
+                  {firmDetails.displaySettings?.showFirmNameOnInvoice !== false ? firmDetails.firmName : ''}
+                </h1>
+              )}
+              {/* Show taglines based on settings */}
+              {(firmDetails.displaySettings?.showTaglineOnInvoice !== false || firmDetails.displaySettings?.showTaglineLocalOnInvoice !== false) && (firmDetails.tagline || firmDetails.taglineLocal) && (
+                <p className="text-xs sm:text-sm text-amber-700 mt-1">
+                  {firmDetails.displaySettings?.showTaglineLocalOnInvoice !== false && firmDetails.taglineLocal ? firmDetails.taglineLocal : ''}
+                  {firmDetails.displaySettings?.showTaglineOnInvoice !== false && firmDetails.displaySettings?.showTaglineLocalOnInvoice !== false && firmDetails.taglineLocal && firmDetails.tagline ? ' | ' : ''}
+                  {firmDetails.displaySettings?.showTaglineOnInvoice !== false && firmDetails.tagline ? firmDetails.tagline : ''}
+                </p>
+              )}
+              {firmDetails.displaySettings?.showAddressOnInvoice !== false && (
+                <p className="text-[10px] sm:text-xs text-gray-500 mt-1 sm:mt-2 leading-tight">
+                  {firmDetails.address}
+                  {firmDetails.city && firmDetails.state && firmDetails.pincode && (
+                    <><br />{firmDetails.city}, {firmDetails.state} {firmDetails.pincode}</>
+                  )}
+                </p>
+              )}
+              {(firmDetails.displaySettings?.showPhoneOnInvoice !== false || firmDetails.displaySettings?.showEmailOnInvoice !== false) && (firmDetails.phone || firmDetails.email) && (
+                <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
+                  {firmDetails.displaySettings?.showPhoneOnInvoice !== false && firmDetails.phone && <span>Phone: {firmDetails.phone}</span>}
+                  {firmDetails.displaySettings?.showPhoneOnInvoice !== false && firmDetails.phone && firmDetails.displaySettings?.showEmailOnInvoice !== false && firmDetails.email && <span> | </span>}
+                  {firmDetails.displaySettings?.showEmailOnInvoice !== false && firmDetails.email && <span>Email: {firmDetails.email}</span>}
+                </p>
+              )}
+              {firmDetails.displaySettings?.showGstOnInvoice !== false && firmDetails.gstNumber && (
+                <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
+                  GST: {firmDetails.gstNumber}
+                </p>
+              )}
             </div>
           </div>
           <div className="text-left sm:text-right w-full sm:w-auto">
@@ -102,6 +104,9 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, 
             </p>
             <p className="text-xs sm:text-sm text-gray-600">
               <strong>Date:</strong> {formattedDate}
+            </p>
+            <p className="text-xs sm:text-sm text-gray-600">
+              <strong>Time:</strong> {formattedTime}
             </p>
           </div>
         </header>
@@ -122,7 +127,7 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, 
                   <div className="font-semibold text-sm text-gray-800">{item.product.name}</div>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="grid grid-cols-4 gap-2 text-xs">
                 <div>
                   <div className="text-gray-500">Qty</div>
                   <div className="font-medium">{item.quantity}</div>
@@ -130,6 +135,13 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, 
                 <div>
                   <div className="text-gray-500">Rate</div>
                   <div className="font-medium">₹{item.product.price.toFixed(2)}</div>
+                </div>
+                <div>
+                  <div className="text-gray-500">GST</div>
+                  <div className="font-medium">
+                    {item.gstRate ?? GST_RATE * 100}%
+                    <span className="text-xs text-gray-600 block">(₹{((item.product.price * item.quantity * (item.gstRate ?? GST_RATE * 100)) / 100).toFixed(2)})</span>
+                  </div>
                 </div>
                 <div className="text-right">
                   <div className="text-gray-500">Amount</div>
@@ -149,6 +161,7 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, 
                 <th className="p-3 font-semibold">Item Description</th>
                 <th className="p-3 font-semibold text-center">Qty</th>
                 <th className="p-3 font-semibold text-right">Rate (₹)</th>
+                <th className="p-3 font-semibold text-center">GST (%)</th>
                 <th className="p-3 font-semibold text-right">Amount (₹)</th>
               </tr>
             </thead>
@@ -159,6 +172,10 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, 
                   <td className="p-3 font-medium">{item.product.name}</td>
                   <td className="p-3 text-center">{item.quantity}</td>
                   <td className="p-3 text-right">{item.product.price.toFixed(2)}</td>
+                  <td className="p-3 text-center">
+                    <div>{item.gstRate ?? GST_RATE * 100}%</div>
+                    <div className="text-xs text-gray-600">(₹{((item.product.price * item.quantity * (item.gstRate ?? GST_RATE * 100)) / 100).toFixed(2)})</div>
+                  </td>
                   <td className="p-3 text-right">{(item.product.price * item.quantity).toFixed(2)}</td>
                 </tr>
               ))}
@@ -173,7 +190,7 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, 
               <span className="font-medium">₹ {invoiceData.subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span>GST ({GST_RATE * 100}%)</span>
+              <span>GST (Variable)</span>
               <span className="font-medium">₹ {invoiceData.gstAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-lg sm:text-xl font-bold text-amber-900 pt-2 border-t-2 border-gray-300">
@@ -182,6 +199,13 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, 
             </div>
           </div>
         </section>
+
+        {/* Custom Invoice Text */}
+        {firmDetails.displaySettings?.customInvoiceText && (
+          <section className="mt-6 sm:mt-8 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+            <p className="text-xs sm:text-sm text-gray-700 whitespace-pre-wrap">{firmDetails.displaySettings.customInvoiceText}</p>
+          </section>
+        )}
 
         <footer className="mt-6 sm:mt-12 pt-4 sm:pt-6 border-t border-gray-200 text-center">
             <p className="text-xs sm:text-sm text-gray-600">Thank you for your business!</p>

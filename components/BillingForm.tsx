@@ -15,6 +15,7 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
   const [selectedProductId, setSelectedProductId] = useState<string>(products.length > 0 ? String(products[0].id) : '');
   const [quantity, setQuantity] = useState<number>(1);
   const [rate, setRate] = useState<string>('');
+  const [gstRate, setGstRate] = useState<number>(GST_RATE * 100); // Store as percentage (e.g., 18 for 18%)
   const [error, setError] = useState<string | null>(null);
 
   // Keep selected product in sync when the products list changes
@@ -33,7 +34,14 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
     return billItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
   }, [billItems]);
 
-  const gstAmount = useMemo(() => subtotal * GST_RATE, [subtotal]);
+  const gstAmount = useMemo(() => {
+    return billItems.reduce((acc, item) => {
+      const itemTotal = item.product.price * item.quantity;
+      const itemGstRate = (item.gstRate ?? GST_RATE * 100) / 100;
+      return acc + (itemTotal * itemGstRate);
+    }, 0);
+  }, [billItems]);
+  
   const grandTotal = useMemo(() => subtotal + gstAmount, [subtotal, gstAmount]);
 
   const handleAddItem = () => {
@@ -46,17 +54,22 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
       const parsedRate = parseFloat(rate as string);
       const productWithRate = { ...product, price: Number.isFinite(parsedRate) && parsedRate > 0 ? parsedRate : product.price };
 
-      const existingItemIndex = billItems.findIndex(item => item.product.id === product.id && item.product.price === productWithRate.price);
+      const existingItemIndex = billItems.findIndex(item => 
+        item.product.id === product.id && 
+        item.product.price === productWithRate.price &&
+        item.gstRate === gstRate
+      );
       if (existingItemIndex !== -1) {
         const updatedItems = [...billItems];
         updatedItems[existingItemIndex].quantity += quantity;
         setBillItems(updatedItems);
       } else {
-        const lineId = `${product.id}-${productWithRate.price}-${Date.now()}-${Math.floor(Math.random()*10000)}`;
-        setBillItems([...billItems, { product: productWithRate, quantity, lineId }]);
+        const lineId = `${product.id}-${productWithRate.price}-${gstRate}-${Date.now()}-${Math.floor(Math.random()*10000)}`;
+        setBillItems([...billItems, { product: productWithRate, quantity, lineId, gstRate }]);
       }
       setQuantity(1);
       setRate('');
+      setGstRate(GST_RATE * 100);
       setError(null);
     }
   };
@@ -73,6 +86,13 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
         item.lineId === lineId ? { ...item, quantity: newQuantity } : item
       ));
     }
+  };
+
+  const handleGstRateChange = (lineId: string | undefined, newGstRate: number) => {
+    if (!lineId) return;
+    setBillItems(billItems.map(item =>
+      item.lineId === lineId ? { ...item, gstRate: newGstRate } : item
+    ));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -161,6 +181,19 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition"
             />
           </div>
+          <div className="flex-grow" style={{maxWidth: '120px'}}>
+            <label htmlFor="gstRate" className="block text-sm font-medium text-gray-600 mb-1">GST (%)</label>
+            <input
+              type="number"
+              id="gstRate"
+              min="0"
+              max="100"
+              step="0.01"
+              value={gstRate}
+              onChange={(e) => setGstRate(parseFloat(e.target.value) || 0)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition"
+            />
+          </div>
           <button
             type="button"
             onClick={handleAddItem}
@@ -183,6 +216,7 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
                 <th className="p-3 text-sm font-semibold text-gray-600">Product</th>
                 <th className="p-3 text-sm font-semibold text-gray-600 text-center">Quantity</th>
                 <th className="p-3 text-sm font-semibold text-gray-600 text-right">Rate (₹)</th>
+                <th className="p-3 text-sm font-semibold text-gray-600 text-center">GST (%)</th>
                 <th className="p-3 text-sm font-semibold text-gray-600 text-right">Amount (₹)</th>
                 <th className="p-3 text-sm font-semibold text-gray-600 text-center">Action</th>
               </tr>
@@ -190,7 +224,7 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
             <tbody>
               {billItems.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center p-8 text-gray-500">
+                  <td colSpan={6} className="text-center p-8 text-gray-500">
                     No items added yet.
                   </td>
                 </tr>
@@ -208,6 +242,17 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
                       />
                     </td>
                     <td className="p-3 text-right">{item.product.price.toFixed(2)}</td>
+                    <td className="p-3 text-center">
+                      <input 
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        value={item.gstRate ?? GST_RATE * 100}
+                        onChange={(e) => handleGstRateChange(item.lineId, parseFloat(e.target.value) || 0)}
+                        className="w-16 text-center border rounded py-1"
+                      />
+                    </td>
                     <td className="p-3 text-right font-semibold">{(item.product.price * item.quantity).toFixed(2)}</td>
                     <td className="p-3 text-center">
                       <button type="button" onClick={() => handleRemoveItem(item.lineId)} className="text-red-500 hover:text-red-700 p-1">
@@ -251,6 +296,21 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
                     <span className="text-gray-600">Rate:</span>
                     <span className="font-medium">₹{item.product.price.toFixed(2)}</span>
                   </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">GST:</span>
+                    <div className="flex items-center gap-1">
+                      <input 
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        value={item.gstRate ?? GST_RATE * 100}
+                        onChange={(e) => handleGstRateChange(item.lineId, parseFloat(e.target.value) || 0)}
+                        className="w-16 text-center border border-gray-300 rounded py-1 px-2 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      />
+                      <span className="text-xs">%</span>
+                    </div>
+                  </div>
                   <div className="flex justify-between items-center pt-2 border-t border-gray-300">
                     <span className="text-gray-600 font-medium">Amount:</span>
                     <span className="font-bold text-base text-amber-900">₹{(item.product.price * item.quantity).toFixed(2)}</span>
@@ -270,7 +330,7 @@ const BillingForm: React.FC<BillingFormProps> = ({ products, onGenerateBill }) =
             <span className="font-medium">₹ {subtotal.toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span>GST ({GST_RATE * 100}%)</span>
+            <span>GST (Variable)</span>
             <span className="font-medium">₹ {gstAmount.toFixed(2)}</span>
           </div>
           <hr className="my-2"/>
