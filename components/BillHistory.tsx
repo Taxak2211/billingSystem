@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { type User } from 'firebase/auth';
 import { db } from '../firebase';
-import { type InvoiceData } from '../types';
+import { EditIcon } from './Icons';
 
 interface BillHistoryProps {
   user: User;
   onViewInvoice: (invoice: InvoiceData) => void;
+  onEditInvoice: (invoice: InvoiceData) => void;
 }
 
-const BillHistory: React.FC<BillHistoryProps> = ({ user, onViewInvoice }) => {
+const BillHistory: React.FC<BillHistoryProps> = ({ user, onViewInvoice, onEditInvoice }) => {
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +31,7 @@ const BillHistory: React.FC<BillHistoryProps> = ({ user, onViewInvoice }) => {
             id: doc.id,
             ...data,
             // Convert Firestore Timestamp to JS Date
-            date: data.createdAt.toDate(),
+            date: data.date ? data.date.toDate() : data.createdAt.toDate(),
           } as InvoiceData;
         });
         setInvoices(invoicesData);
@@ -101,12 +102,21 @@ const BillHistory: React.FC<BillHistoryProps> = ({ user, onViewInvoice }) => {
                     <td className="p-3 font-medium">{invoice.customerName}</td>
                     <td className="p-3 text-right font-semibold">{invoice.grandTotal.toFixed(2)}</td>
                     <td className="p-3 text-center">
-                      <button 
-                        onClick={() => onViewInvoice(invoice)}
-                        className="px-4 py-1 bg-amber-600 text-white text-sm font-semibold rounded-md hover:bg-amber-700 transition"
-                      >
-                        View
-                      </button>
+                      <div className="flex items-center justify-center gap-2">
+                        <button 
+                          onClick={() => onViewInvoice(invoice)}
+                          className="px-3 py-1 bg-amber-600 text-white text-sm font-semibold rounded-md hover:bg-amber-700 transition"
+                        >
+                          View
+                        </button>
+                        <button 
+                          onClick={() => onEditInvoice(invoice)}
+                          className="p-1 text-blue-600 hover:text-blue-800 transition"
+                          title="Edit Invoice"
+                        >
+                          <EditIcon />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -129,12 +139,20 @@ const BillHistory: React.FC<BillHistoryProps> = ({ user, onViewInvoice }) => {
                     <h3 className="font-semibold text-gray-800">{invoice.customerName}</h3>
                     <p className="text-xs font-mono text-gray-600 mt-1">{invoice.invoiceNumber}</p>
                   </div>
-                  <button 
-                    onClick={() => onViewInvoice(invoice)}
-                    className="px-3 py-1 bg-amber-600 text-white text-xs font-semibold rounded-md hover:bg-amber-700 transition"
-                  >
-                    View
-                  </button>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => onEditInvoice(invoice)}
+                      className="p-1 text-blue-600 hover:text-blue-800 transition"
+                    >
+                      <EditIcon />
+                    </button>
+                    <button 
+                      onClick={() => onViewInvoice(invoice)}
+                      className="px-3 py-1 bg-amber-600 text-white text-xs font-semibold rounded-md hover:bg-amber-700 transition"
+                    >
+                      View
+                    </button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>

@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import { type Product } from '../types';
-import { PlusIcon, TrashIcon } from './Icons';
+import { PlusIcon, TrashIcon, EditIcon, CheckIcon, XIcon } from './Icons';
 
 interface ProductManagerProps {
   products: Product[];
   onAddProduct: (name: string, price: number) => void;
   onDeleteProduct: (id: number, docId?: string) => void;
+  onUpdateProduct?: (id: number, name: string, price: number, docId?: string) => void;
 }
 
-const ProductManager: React.FC<ProductManagerProps> = ({ products, onAddProduct, onDeleteProduct }) => {
+const ProductManager: React.FC<ProductManagerProps> = ({ products, onAddProduct, onDeleteProduct, onUpdateProduct }) => {
   const [newProdName, setNewProdName] = useState('');
   const [newProdPrice, setNewProdPrice] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Edit state
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editPrice, setEditPrice] = useState('');
 
   const handleAddProduct = () => {
     const name = newProdName.trim();
@@ -37,6 +43,37 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, onAddProduct,
     }
   };
 
+  const handleEditClick = (product: Product) => {
+    setEditingId(product.id);
+    setEditName(product.name);
+    setEditPrice(product.price.toString());
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditName('');
+    setEditPrice('');
+  };
+
+  const handleSaveEdit = (product: Product) => {
+    if (!onUpdateProduct) return;
+    
+    const name = editName.trim();
+    const price = parseFloat(editPrice);
+    
+    if (!name) {
+      alert('Product name cannot be empty.');
+      return;
+    }
+    if (!Number.isFinite(price) || price <= 0) {
+      alert('Enter a valid price greater than 0.');
+      return;
+    }
+    
+    onUpdateProduct(product.id, name, price, product.docId);
+    setEditingId(null);
+  };
+
   // Filter products based on search term
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -45,7 +82,7 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, onAddProduct,
   );
 
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg space-y-6 max-h-[80vh] flex flex-col">
+    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg space-y-6 max-h-[150vh] flex flex-col">
       <div className="border-b border-gray-200 pb-4">
         <h2 className="text-2xl font-semibold text-gray-700">Product Management</h2>
         <p className="text-sm text-gray-500 mt-1">Add, edit, or remove products from your catalog</p>
@@ -129,18 +166,76 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, onAddProduct,
                   filteredProducts.map((p) => (
                     <tr key={p.id} className="border-b hover:bg-gray-50">
                       <td className="p-3 text-gray-600">{p.id}</td>
-                      <td className="p-3 font-medium">{p.name}</td>
-                      <td className="p-3 text-right">{p.price.toFixed(2)}</td>
-                      <td className="p-3 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteProduct(p.id, p.docId)}
-                          className="inline-flex items-center gap-1 px-3 py-1 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition"
-                        >
-                          <TrashIcon />
-                          Delete
-                        </button>
-                      </td>
+                      {editingId === p.id ? (
+                        <>
+                          <td className="p-3">
+                            <input 
+                              type="text" 
+                              value={editName} 
+                              onChange={(e) => setEditName(e.target.value)}
+                              className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-amber-500"
+                              autoFocus
+                            />
+                          </td>
+                          <td className="p-3 text-right">
+                            <input 
+                              type="number" 
+                              value={editPrice} 
+                              onChange={(e) => setEditPrice(e.target.value)}
+                              className="w-24 px-2 py-1 border rounded text-right focus:ring-2 focus:ring-amber-500"
+                              min="0"
+                              step="0.01"
+                            />
+                          </td>
+                          <td className="p-3 text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleSaveEdit(p)}
+                                className="text-green-600 hover:text-green-700 p-1"
+                                title="Save"
+                              >
+                                <CheckIcon />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleCancelEdit}
+                                className="text-gray-500 hover:text-gray-700 p-1"
+                                title="Cancel"
+                              >
+                                <XIcon />
+                              </button>
+                            </div>
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="p-3 font-medium">{p.name}</td>
+                          <td className="p-3 text-right">{p.price.toFixed(2)}</td>
+                          <td className="p-3 text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              {onUpdateProduct && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleEditClick(p)}
+                                  className="inline-flex items-center gap-1 px-2 py-1 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition"
+                                >
+                                  <EditIcon />
+                                  Edit
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteProduct(p.id, p.docId)}
+                                className="inline-flex items-center gap-1 px-2 py-1 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition"
+                              >
+                                <TrashIcon />
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </>
+                      )}
                     </tr>
                   ))
                 )}
@@ -157,23 +252,77 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, onAddProduct,
             ) : (
               filteredProducts.map((p) => (
                 <div key={p.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-800">{p.name}</h3>
-                      <p className="text-xs text-gray-600 mt-1">ID: {p.id}</p>
+                  {editingId === p.id ? (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Product Name</label>
+                        <input 
+                          type="text" 
+                          value={editName} 
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-amber-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Price (₹)</label>
+                        <input 
+                          type="number" 
+                          value={editPrice} 
+                          onChange={(e) => setEditPrice(e.target.value)}
+                          className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-amber-500"
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEdit}
+                          className="px-3 py-1 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-100"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSaveEdit(p)}
+                          className="px-3 py-1 text-sm text-white bg-green-600 rounded hover:bg-green-700"
+                        >
+                          Save
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteProduct(p.id, p.docId)}
-                      className="text-red-600 hover:text-red-700 p-1"
-                    >
-                      <TrashIcon />
-                    </button>
-                  </div>
-                  <div className="flex justify-between items-center pt-3 border-t border-gray-300">
-                    <span className="text-gray-600 text-sm">Price:</span>
-                    <span className="font-bold text-lg text-amber-900">₹{p.price.toFixed(2)}</span>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-800">{p.name}</h3>
+                          <p className="text-xs text-gray-600 mt-1">ID: {p.id}</p>
+                        </div>
+                        <div className="flex gap-1">
+                          {onUpdateProduct && (
+                            <button
+                              type="button"
+                              onClick={() => handleEditClick(p)}
+                              className="text-blue-600 hover:text-blue-700 p-1"
+                            >
+                              <EditIcon />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProduct(p.id, p.docId)}
+                            className="text-red-600 hover:text-red-700 p-1"
+                          >
+                            <TrashIcon />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center pt-3 border-t border-gray-300">
+                        <span className="text-gray-600 text-sm">Price:</span>
+                        <span className="font-bold text-lg text-amber-900">₹{p.price.toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))
             )}

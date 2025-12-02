@@ -49,6 +49,11 @@ const FirmSetup: React.FC<FirmSetupProps> = ({ userId, onComplete, existingDetai
     customInvoiceText: existingDetails?.displaySettings?.customInvoiceText || '',
   });
 
+  const [invoiceFormat, setInvoiceFormat] = useState({
+    type: existingDetails?.invoiceFormat?.type || 'timestamp',
+    startNumber: existingDetails?.invoiceFormat?.startNumber || 1,
+  });
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -166,6 +171,14 @@ const FirmSetup: React.FC<FirmSetupProps> = ({ userId, onComplete, existingDetai
       
       // Add display settings
       firmDetails.displaySettings = displaySettings;
+
+      // Add invoice format settings
+      // Preserve currentNumber if it exists, otherwise start fresh
+      firmDetails.invoiceFormat = {
+        type: invoiceFormat.type,
+        startNumber: Number(invoiceFormat.startNumber),
+        currentNumber: existingDetails?.invoiceFormat?.currentNumber || (Number(invoiceFormat.startNumber) - 1)
+      };
 
       // Save to Firestore
       const firmDocRef = doc(db, 'firmDetails', userId);
@@ -412,6 +425,61 @@ const FirmSetup: React.FC<FirmSetupProps> = ({ userId, onComplete, existingDetai
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 placeholder="તમારી બિઝનેસની ટેગલાઇન"
               />
+            </div>
+          </div>
+
+          {/* Invoice Numbering Settings */}
+          <div className="border-t-2 border-gray-200 pt-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Invoice Numbering</h3>
+            <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Numbering Style</label>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="invoiceType"
+                        value="timestamp"
+                        checked={invoiceFormat.type === 'timestamp'}
+                        onChange={() => setInvoiceFormat(prev => ({ ...prev, type: 'timestamp' }))}
+                        className="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500"
+                      />
+                      <span className="text-sm text-gray-700">Prefix + Date (e.g., INV-1634567890)</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="invoiceType"
+                        value="sequential"
+                        checked={invoiceFormat.type === 'sequential'}
+                        onChange={() => setInvoiceFormat(prev => ({ ...prev, type: 'sequential' }))}
+                        className="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500"
+                      />
+                      <span className="text-sm text-gray-700">Sequential (e.g., 1, 2, 3...)</span>
+                    </label>
+                  </div>
+                </div>
+
+                {invoiceFormat.type === 'sequential' && (
+                  <div>
+                    <label htmlFor="startNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                      Start From Number
+                    </label>
+                    <input
+                      type="number"
+                      id="startNumber"
+                      min="1"
+                      value={invoiceFormat.startNumber}
+                      onChange={(e) => setInvoiceFormat(prev => ({ ...prev, startNumber: parseInt(e.target.value) || 1 }))}
+                      className="w-full sm:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      The next bill generated will have this number (or the next available number if you've already created bills).
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

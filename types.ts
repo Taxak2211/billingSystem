@@ -9,6 +9,15 @@ export interface Product {
   docId?: string;
 }
 
+export interface Customer {
+  id: string; // Firestore document id
+  name: string;
+  phone?: string;
+  address?: string;
+  gstNumber?: string;
+  userId: string;
+}
+
 export interface BillItem {
   product: Product;
   quantity: number;
@@ -49,6 +58,12 @@ export interface FirmDetails {
   taglineLocal?: string; // Optional: Local language tagline
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
+  // Invoice Numbering Format
+  invoiceFormat?: {
+    type: 'timestamp' | 'sequential';
+    startNumber?: number; // For sequential, default 1
+    currentNumber?: number; // The last used number
+  };
   // Display preferences
   displaySettings?: {
     showLogoOnHeader?: boolean;

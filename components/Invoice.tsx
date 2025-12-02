@@ -8,18 +8,35 @@ interface InvoiceProps {
   backButtonText: string;
   onSave?: (invoiceData: InvoiceData) => Promise<boolean | void>;
   firmDetails: FirmDetails;
+  isPreview?: boolean;
 }
 
-const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, onSave, firmDetails }) => {
+const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, onSave, firmDetails, isPreview = false }) => {
   const invoiceRef = useRef<HTMLDivElement>(null);
+  const [isSaving, setIsSaving] = React.useState(false);
 
   const handlePrint = async () => {
-    // Save to Firestore before printing (only if not already saved)
-    if (onSave && !invoiceData.id) {
-      const saved = await onSave(invoiceData);
-      if (!saved) {
-        return; // Don't print if save failed
+    // Prevent multiple clicks
+    if (isSaving) return;
+
+    // Save to Firestore before printing (only if not already saved OR if it's a preview of changes)
+    if (onSave && (isPreview || !invoiceData.id)) {
+      setIsSaving(true);
+      try {
+        const saved = await onSave(invoiceData);
+        if (!saved) {
+          setIsSaving(false);
+          return; // Don't print if save failed
+        }
+      } catch (error) {
+        console.error("Error saving invoice:", error);
+        setIsSaving(false);
+        return;
       }
+      // Note: We don't strictly need to set isSaving(false) here if successful, 
+      // because the parent will likely update the invoiceData with an ID, causing a re-render.
+      // But for safety/completeness in case of logic changes:
+      setIsSaving(false);
     }
     window.print();
   };
@@ -221,9 +238,14 @@ const Invoice: React.FC<InvoiceProps> = ({ invoiceData, onBack, backButtonText, 
         </button>
         <button
           onClick={handlePrint}
-          className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-2 bg-amber-600 text-white font-semibold rounded-lg hover:bg-amber-700 transition text-sm sm:text-base"
+          disabled={isSaving}
+          className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-2 font-semibold rounded-lg transition text-sm sm:text-base ${
+            isSaving 
+              ? 'bg-gray-400 text-white cursor-not-allowed' 
+              : 'bg-amber-600 text-white hover:bg-amber-700'
+          }`}
         >
-          {invoiceData.id ? 'Print Invoice' : 'Save & Print Invoice'}
+          {isSaving ? 'Saving...' : ((!isPreview && invoiceData.id) ? 'Print Invoice' : (invoiceData.id ? 'Update & Print Invoice' : 'Save & Print Invoice'))}
         </button>
       </div>
     </div>
